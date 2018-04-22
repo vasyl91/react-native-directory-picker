@@ -1,28 +1,24 @@
 {
-  "name": "react-native-file-picker",
-  "version": "0.0.11",
-  "description": "A React Native module that allows you to use native UI to select file from the device library on Android",
+  "name": "react-native-directory-picker",
+  "version": "0.0.1",
+  "description": "A React Native module that allows you to use native UI to select directory from the device library on Android",
   "main": "index.android.js",
-  "types": "index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/luisfuertes/react-native-file-picker"
+    "url": "https://github.com/lokdevp/react-native-directory-picker.git"
   },
   "nativePackage": true,
-  "author": "Luis Fuertes <luis.fuertes@clouddistrict.com>",
+  "author": "Lokesh Dev <lokdevp@gmail.com>",
   "license": "ISC",
   "keywords": [
     "react-native",
-    "react-native-file-picker",
+    "react-native-directory-picker",
     "react",
     "native",
-    "file",
+    "directory",
     "picker"
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "devDependencies": {
-    "react-native": "^0.21.0"
   }
 }

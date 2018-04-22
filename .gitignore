@@ -30,3 +30,8 @@ project.xcworkspace
 # Node
 node_modules
 *.log
+.gradle/
+.settings/
+.project
+.vscode/
+yarn.lock

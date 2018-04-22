@@ -1,4 +1,4 @@
-package com.filepicker;
+package com.directorypicker;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JavaScriptModule;
@@ -10,10 +10,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class FilePickerPackage implements ReactPackage {
+public class DirectoryPickerPackage implements ReactPackage {
   @Override
   public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-    return Arrays.<NativeModule>asList(new FilePickerModule(reactContext));
+    return Arrays.<NativeModule>asList(new DirectoryPickerModule(reactContext));
   }
 
   // @Override
