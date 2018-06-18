@@ -66,13 +66,20 @@ public class DirectoryPickerModule extends ReactContextBaseJavaModule implements
         Activity currentActivity = getCurrentActivity();
         response = Arguments.createMap();
 
+        if (!permissionsCheck(currentActivity)) {
+            response.putBoolean("didRequestPermission", true);
+            response.putString("option", "launchFileChooser");
+            callback.invoke(response);
+            return;
+        }
+
         if (currentActivity == null) {
             response.putString("error", "can't find current Activity");
             callback.invoke(response);
             return;
         }
 
-                launchDirectoryChooser(callback);
+        launchDirectoryChooser(callback);
     }
 
     @ReactMethod
