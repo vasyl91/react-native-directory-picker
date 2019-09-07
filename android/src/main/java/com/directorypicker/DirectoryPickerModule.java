@@ -169,7 +169,7 @@ public class DirectoryPickerModule extends ReactContextBaseJavaModule implements
                     }
                 }
             } catch (Exception ex) {
-                return null
+                return null;
             }
         }
         return null;
