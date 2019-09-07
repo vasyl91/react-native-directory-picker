@@ -9,7 +9,9 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 
-import android.support.v4.provider.DocumentFile;
+import androidx.core.app.ActivityCompat;
+import androidx.documentfile.provider.DocumentFile;
+
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -23,16 +25,15 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
-import android.support.v4.app.ActivityCompat;
-import android.util.Log;
-import android.widget.ArrayAdapter;
+
+import javax.annotation.Nonnull;
 
 public class DirectoryPickerModule extends ReactContextBaseJavaModule implements ActivityEventListener {
 
     private final ReactApplicationContext mReactContext;
 
     private Callback mCallback;
-    WritableMap response;
+    private WritableMap response;
 
     public DirectoryPickerModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -54,13 +55,15 @@ public class DirectoryPickerModule extends ReactContextBaseJavaModule implements
         return true;
     }
 
+    @Nonnull
     @Override
     public String getName() {
         return "DirectoryPickerManager";
-    }    
+    }
 
     //Directory Chooser
-    static final int REQUEST_LAUNCH_DIRECTORY_CHOOSER = 42;
+    private static final int REQUEST_LAUNCH_DIRECTORY_CHOOSER = 42;
+
     @ReactMethod
     public void showDirectoryPicker(final ReadableMap options, final Callback callback) {
         Activity currentActivity = getCurrentActivity();
@@ -85,7 +88,7 @@ public class DirectoryPickerModule extends ReactContextBaseJavaModule implements
     @ReactMethod
     public void launchDirectoryChooser(final Callback callback) {
         int requestCode;
-        Intent libraryIntent;
+        Intent libraryIntent = null;
         response = Arguments.createMap();
         Activity currentActivity = getCurrentActivity();
 
@@ -96,7 +99,10 @@ public class DirectoryPickerModule extends ReactContextBaseJavaModule implements
         }
 
         requestCode = REQUEST_LAUNCH_DIRECTORY_CHOOSER;
-        libraryIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            libraryIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+        }
+        if(libraryIntent == null) return;
         libraryIntent.putExtra("android.content.extra.SHOW_ADVANCED", true);
         libraryIntent.putExtra("android.content.extra.SHOW_FILESIZE", true);
 
@@ -117,49 +123,54 @@ public class DirectoryPickerModule extends ReactContextBaseJavaModule implements
 
     // R.N > 33
     public void onActivityResult(final Activity activity, final int requestCode, final int resultCode, final Intent data) {
-      onActivityResult(requestCode, resultCode, data);
+        onActivityResult(requestCode, resultCode, data);
     }
 
-    public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+    private void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
 
-      //robustness code
-      if (mCallback == null || requestCode != REQUEST_LAUNCH_DIRECTORY_CHOOSER) {
-        return;
-      }
-      // user cancel
-      if (resultCode != Activity.RESULT_OK) {
-          response.putBoolean("didCancel", true);
-          mCallback.invoke(response);
-          return;
-      }
+        //robustness code
+        if (mCallback == null || requestCode != REQUEST_LAUNCH_DIRECTORY_CHOOSER) {
+            return;
+        }
+        // user cancel
+        if (resultCode != Activity.RESULT_OK) {
+            response.putBoolean("didCancel", true);
+            mCallback.invoke(response);
+            return;
+        }
 
         //Handle Directory
-      if (requestCode == REQUEST_LAUNCH_DIRECTORY_CHOOSER) {
         Uri treeUri = data.getData();
+        if(treeUri == null) return;
         DocumentFile pickedDir = DocumentFile.fromTreeUri(mReactContext, treeUri);
-        response.putString("path", getPath(mReactContext, treeUri)); 
+        response.putString("path", getPath(mReactContext, treeUri));
+        if(pickedDir == null) return;
         response.putString("dirname", pickedDir.getName());
         response.putString("decodedUri", Uri.decode(treeUri.toString()));
         mCallback.invoke(response);
-        return;
-      }     
-    }       
+    }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    public static String getPath(final Context context, final Uri uri) {
+    private static String getPath(final Context context, final Uri uri) {
 
         final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
         if (isKitKat) {
-            // ExternalStorageProvider
-            if (isExternalStorageDocument(uri)) {
-                final String docId = uri.getPath();
-                final String[] split = docId.split(":");
-                final String type = split[0];
+            try {
+                // ExternalStorageProvider
+                if (isExternalStorageDocument(uri)) {
+                    final String docId = uri.getPath();
+                    if (docId == null) return null;
+                    final String[] split = docId.split(":");
+                    if (split.length <= 0) return null;
+                    final String type = split[0];
 
-                if ("/tree/primary".equalsIgnoreCase(type)) {
-                    return Environment.getExternalStorageDirectory() + "/" + split[1];
-                }                
-            }           
+                    if ("/tree/primary".equalsIgnoreCase(type)) {
+                        return Environment.getExternalStorageDirectory() + "/" + split[1];
+                    }
+                }
+            } catch (Exception ex) {
+                return null
+            }
         }
         return null;
     }
@@ -168,11 +179,12 @@ public class DirectoryPickerModule extends ReactContextBaseJavaModule implements
      * @param uri The Uri to check.
      * @return Whether the Uri authority is ExternalStorageProvider.
      */
-    public static boolean isExternalStorageDocument(Uri uri) {
+    private static boolean isExternalStorageDocument(Uri uri) {
         return "com.android.externalstorage.documents".equals(uri.getAuthority());
-    }    
+    }
 
     // Required for RN 0.30+ modules than implement ActivityEventListener
-    public void onNewIntent(Intent intent) { }
+    public void onNewIntent(Intent intent) {
+    }
 
 }
