@@ -165,7 +165,11 @@ public class DirectoryPickerModule extends ReactContextBaseJavaModule implements
                     final String type = split[0];
 
                     if ("/tree/primary".equalsIgnoreCase(type)) {
-                        return Environment.getExternalStorageDirectory() + "/" + split[1];
+					  String path = Environment.getExternalStorageDirectory().getPath();
+					  if (split.length > 1) {
+						path += "/" + split[1];
+					  }
+					  return path;
                     }
                 }
             } catch (Exception ex) {
