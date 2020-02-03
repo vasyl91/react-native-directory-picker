@@ -8,7 +8,7 @@ A React Native module that allows you to use native UI to select a directory fro
 ### Android
 
 ```bash
-$ npm install git+https://github.com/lokdevp/react-native-directory-picker.git
+$ npm install git+https://github.com/vasyl91/react-native-directory-picker.git
 $ react-native link
 ```
 
